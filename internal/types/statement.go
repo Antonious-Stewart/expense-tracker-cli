@@ -18,7 +18,7 @@ type Statement struct {
 	Budget   float64
 }
 
-func NewStatement(budget float64) {
+func NewStatement(budget float64) error {
 	currentTime := time.Now()
 	statementDate := currentTime.Format("01/06")
 	statement := Statement{
@@ -28,34 +28,38 @@ func NewStatement(budget float64) {
 		budget,
 	}
 
-	fPath, err := filepath.Abs("../../statements")
+	dirPath, err := filepath.Abs("../../statements")
 
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
-	path := fmt.Sprintf("%s/%s.json", fPath, currentTime.Format("2006-01-02"))
+	path := filepath.Join(dirPath, fmt.Sprintf("%s.json", currentTime.Format("01-2006")))
 
 	fileData, err := json.Marshal(statement)
 
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	_, err = os.Stat(path)
 
 	if err == nil {
-		log.Panic(errors.New("budget has already been set for the month"))
+		return errors.New("budget has already been set for the month")
 	}
 
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0666)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0750)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
 
 	if _, err := file.Write(fileData); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	log.Printf("%s File Created", time.DateOnly)
+
+	return nil
 }

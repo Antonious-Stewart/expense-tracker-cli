@@ -6,18 +6,20 @@ import (
 )
 
 type Expense struct {
-	Date   string
-	Amount float64
-	ID     uuid.UUID
+	Date        string
+	Amount      float64
+	ID          uuid.UUID
+	Description string
 }
 
-func NewExpense(amount float64) Expense {
+func NewExpense(amount float64, desc string) Expense {
 	currentTime := time.Now()
 	expenseDate := currentTime.Format("01/02/2006")
 
 	return Expense{
-		Date:   expenseDate,
-		ID:     uuid.New(),
-		Amount: amount,
+		Date:        expenseDate,
+		ID:          uuid.New(),
+		Amount:      amount,
+		Description: desc,
 	}
 }
