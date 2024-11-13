@@ -42,6 +42,7 @@ func NewFlagOperations(statementHandler statement.Handler, expenseHandler expens
 	}{
 		{"budget", types.Budget},
 		{"add", types.Add},
+		{"list", types.List},
 	}
 
 	for _, flagInfo := range flags {
@@ -100,6 +101,17 @@ func (f *FlagOperations) HandleAddCommand(args []string) error {
 	return f.ExpenseHandler.AddExpense(newExpense)
 }
 
+func (f *FlagOperations) HandleListCommand(args []string) error {
+	defaultDate := time.Now().Format("01-2006")
+	periodCmd := f.FlagSets[types.List].String("period", defaultDate, "used to determine which statement to grab")
+
+	if err := f.FlagSets[types.List].Parse(args[2:]); err != nil {
+		return err
+	}
+
+	return f.StatementHandler.ListExpenses(*periodCmd)
+}
+
 func (f *FlagOperations) runner(args []string) error {
 	var err error
 
@@ -108,6 +120,8 @@ func (f *FlagOperations) runner(args []string) error {
 		err = f.HandleBudgetCommand(args)
 	case types.Add.String():
 		err = f.HandleAddCommand(args)
+	case types.List.String():
+		err = f.HandleListCommand(args)
 	default:
 		err = fmt.Errorf("unknown sub-command: %s", args[1])
 	}
